@@ -10,17 +10,16 @@ fi
 wait
 
 echo -e "\e[32m
-               ██
-████████  ██       ████████  ████████    ███████     ████████    ███         ███
-██        ██   ██     ██     ██          ██     ██   ██           ███       ███
-████████  ██   ██     ██     ████████    ██      ██  ████████      ███     ███
-██        ██   ██     ██     ██          ██     ██   ██             ███   ███
-████████  ██   ██     ██     ████████    ███████     ████████         █████
+██     ██ ██ ███████ ██     ██ ██ ███████     ██   ██ ██    ██ ██ 
+██     ██ ██    ███  ██     ██ ██    ███       ██ ██  ██    ██ ██ 
+██  █  ██ ██   ███   ██  █  ██ ██   ███         ███   ██    ██ ██ 
+██ ███ ██ ██  ███    ██ ███ ██ ██  ███         ██ ██  ██    ██ ██ 
+ ███ ███  ██ ███████  ███ ███  ██ ███████     ██   ██  ██████  ██ 
 \033[0m"
-echo -e "    \e[31mTelegram Channel: \e[34m@ElitDevTeam\033[0m | \e[31mTelegram Group: \e[34m@EliteDevTeam\033[0m\n"
+echo -e "    \e[31mTelegram Channel: \e[34m@wizwizch\033[0m | \e[31mTelegram Group: \e[34m@wizwizdev\033[0m\n"
 
 #sleep
-echo -e "\e[32mInstalling Elitedev script ... \033[0m\n"
+echo -e "\e[32mInstalling WizWiz script ... \033[0m\n"
 sleep 5
 
 sudo apt update && apt upgrade -y
@@ -98,9 +97,9 @@ sudo systemctl restart apache2.service
 
 wait
 
-git clone https://github.com/EliteDevIR/elitedevbot.git /var/www/html/elitedevbot
-sudo chown -R www-data:www-data /var/www/html/elitedevbot/
-sudo chmod -R 755 /var/www/html/elitedevbot/
+git clone https://github.com/EliteDevIR/elitedevbot.git /var/www/html/wizwizxui-timebot
+sudo chown -R www-data:www-data /var/www/html/wizwizxui-timebot/
+sudo chmod -R 755 /var/www/html/wizwizxui-timebot/
 echo -e "\n\033[33mWizWiz config and script have been installed successfully\033[0m"
 
 wait
@@ -188,11 +187,11 @@ DOMAIN_NAME="$domainname"
 
 # update cron
 PATHS=$(cat /root/confwizwiz/dbrootwizwiz.txt | grep '$path' | cut -d"'" -f2)
-(crontab -l ; echo "* * * * * curl https://${DOMAIN_NAME}/elitedevbot/settings/messagewizwiz.php >/dev/null 2>&1") | sort - | uniq - | crontab -
-(crontab -l ; echo "* * * * * curl https://${DOMAIN_NAME}/elitedevbot/settings/rewardReport.php >/dev/null 2>&1") | sort - | uniq - | crontab -
-(crontab -l ; echo "* * * * * curl https://${DOMAIN_NAME}/elitedevbot/settings/warnusers.php >/dev/null 2>&1") | sort - | uniq - | crontab -
-(crontab -l ; echo "* * * * * curl https://${DOMAIN_NAME}/elitedevbot/settings/gift2all.php >/dev/null 2>&1") | sort - | uniq - | crontab -
-(crontab -l ; echo "*/3 * * * * curl https://${DOMAIN_NAME}/elitedevbot/settings/tronChecker.php >/dev/null 2>&1") | sort - | uniq - | crontab -
+(crontab -l ; echo "* * * * * curl https://${DOMAIN_NAME}/wizwizxui-timebot/settings/messagewizwiz.php >/dev/null 2>&1") | sort - | uniq - | crontab -
+(crontab -l ; echo "* * * * * curl https://${DOMAIN_NAME}/wizwizxui-timebot/settings/rewardReport.php >/dev/null 2>&1") | sort - | uniq - | crontab -
+(crontab -l ; echo "* * * * * curl https://${DOMAIN_NAME}/wizwizxui-timebot/settings/warnusers.php >/dev/null 2>&1") | sort - | uniq - | crontab -
+(crontab -l ; echo "* * * * * curl https://${DOMAIN_NAME}/wizwizxui-timebot/settings/gift2all.php >/dev/null 2>&1") | sort - | uniq - | crontab -
+(crontab -l ; echo "*/3 * * * * curl https://${DOMAIN_NAME}/wizwizxui-timebot/settings/tronChecker.php >/dev/null 2>&1") | sort - | uniq - | crontab -
 (crontab -l ; echo "* * * * * curl https://${DOMAIN_NAME}/${PATHS}/backupnutif.php >/dev/null 2>&1") | sort - | uniq - | crontab -
 
 echo -e "\n\e[92m Setting Up Cron...\033[0m\n"
@@ -293,7 +292,7 @@ wait
 
         sleep 1
         
-        file_path="/var/www/html/elitedevbot/baseInfo.php"
+        file_path="/var/www/html/wizwizxui-timebot/baseInfo.php"
         
         if [ -f "$file_path" ]; then
           rm "$file_path"
@@ -305,41 +304,41 @@ wait
         sleep 2
         
         # print file
-        echo -e "<?php" >> /var/www/html/elitedevbot/baseInfo.php
-        echo -e "error_reporting(0);" >> /var/www/html/elitedevbot/baseInfo.php
-        echo -e "${ASAS}botToken = '${YOUR_BOT_TOKEN}';" >> /var/www/html/elitedevbot/baseInfo.php
-        echo -e "${ASAS}dbUserName = '${dbuser}';" >> /var/www/html/elitedevbot/baseInfo.php
-        echo -e "${ASAS}dbPassword = '${dbpass}';" >> /var/www/html/elitedevbot/baseInfo.php
-        echo -e "${ASAS}dbName = '${dbname}';" >> /var/www/html/elitedevbot/baseInfo.php
-        echo -e "${ASAS}botUrl = 'https://${YOUR_DOMAIN}/elitedevbot/';" >> /var/www/html/elitedevbot/baseInfo.php
-        echo -e "${ASAS}admin = ${YOUR_CHAT_ID};" >> /var/www/html/elitedevbot/baseInfo.php
-        echo -e "?>" >> /var/www/html/elitedevbot/baseInfo.php
+        echo -e "<?php" >> /var/www/html/wizwizxui-timebot/baseInfo.php
+        echo -e "error_reporting(0);" >> /var/www/html/wizwizxui-timebot/baseInfo.php
+        echo -e "${ASAS}botToken = '${YOUR_BOT_TOKEN}';" >> /var/www/html/wizwizxui-timebot/baseInfo.php
+        echo -e "${ASAS}dbUserName = '${dbuser}';" >> /var/www/html/wizwizxui-timebot/baseInfo.php
+        echo -e "${ASAS}dbPassword = '${dbpass}';" >> /var/www/html/wizwizxui-timebot/baseInfo.php
+        echo -e "${ASAS}dbName = '${dbname}';" >> /var/www/html/wizwizxui-timebot/baseInfo.php
+        echo -e "${ASAS}botUrl = 'https://${YOUR_DOMAIN}/wizwizxui-timebot/';" >> /var/www/html/wizwizxui-timebot/baseInfo.php
+        echo -e "${ASAS}admin = ${YOUR_CHAT_ID};" >> /var/www/html/wizwizxui-timebot/baseInfo.php
+        echo -e "?>" >> /var/www/html/wizwizxui-timebot/baseInfo.php
 
         sleep 1
 
-        curl -F "url=https://${YOUR_DOMAIN}/elitedevbot/bot.php" "https://api.telegram.org/bot${YOUR_BOT_TOKEN}/setWebhook"
-        MESSAGE="✅ The Elitedev bot has been successfully installed! @EliteDevTeam"
+        curl -F "url=https://${YOUR_DOMAIN}/wizwizxui-timebot/bot.php" "https://api.telegram.org/bot${YOUR_BOT_TOKEN}/setWebhook"
+        MESSAGE="✅ The wizwiz bot has been successfully installed! @wizwizch"
         curl -s -X POST "https://api.telegram.org/bot${YOUR_BOT_TOKEN}/sendMessage" -d chat_id="${YOUR_CHAT_ID}" -d text="$MESSAGE"
         
         
         sleep 1
         
-        url="https://${YOUR_DOMAIN}/elitedevbot/createDB.php"
+        url="https://${YOUR_DOMAIN}/wizwizxui-timebot/createDB.php"
         curl $url
         
         sleep 1
         
-        sudo rm -r /var/www/html/elitedevbot/webpanel
-        sudo rm -r /var/www/html/elitedevbot/install
-        sudo rm /var/www/html/elitedevbot/createDB.php
-	rm /var/www/html/elitedevbot/updateShareConfig.php
-	rm /var/www/html/elitedevbot/README.md
-	rm /var/www/html/elitedevbot/README-fa.md
-	rm /var/www/html/elitedevbot/LICENSE
-	rm /var/www/html/elitedevbot/update.sh
-	rm /var/www/html/elitedevbot/wizwiz.sh
-	rm /var/www/html/elitedevbot/tempCookie.txt
-	rm /var/www/html/elitedevbot/settings/messagewizwiz.json
+        sudo rm -r /var/www/html/wizwizxui-timebot/webpanel
+        sudo rm -r /var/www/html/wizwizxui-timebot/install
+        sudo rm /var/www/html/wizwizxui-timebot/createDB.php
+	rm /var/www/html/wizwizxui-timebot/updateShareConfig.php
+	rm /var/www/html/wizwizxui-timebot/README.md
+	rm /var/www/html/wizwizxui-timebot/README-fa.md
+	rm /var/www/html/wizwizxui-timebot/LICENSE
+	rm /var/www/html/wizwizxui-timebot/update.sh
+	rm /var/www/html/wizwizxui-timebot/wizwiz.sh
+	rm /var/www/html/wizwizxui-timebot/tempCookie.txt
+	rm /var/www/html/wizwizxui-timebot/settings/messagewizwiz.json
             
         clear
         
@@ -351,12 +350,12 @@ wait
         echo -e "\e[33mDatabase username: \e[36m${dbuser}\033[0m"
         echo -e "\e[33mDatabase password: \e[36m${dbpass}\033[0m"
         echo " "
-        echo -e "\e[100melitedev panel:\033[0m"
+        echo -e "\e[100mwizwiz panel:\033[0m"
         echo -e "\e[33maddres: \e[36mhttps://${YOUR_DOMAIN}/${RANDOM_CODE}/login.php\033[0m"
         
         echo " "
         
-        echo -e "Good Luck Baby! \e[94mThis If you like it, be sure to donate me :) , so let's go \033[0m\n"
+        echo -e "Good Luck Baby! \e[94mThis project is for free. If you like it, be sure to donate me :) , so let's go \033[0m\n"
 
         fi
 
