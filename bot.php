@@ -661,7 +661,7 @@ if($data=="inviteFriends"){
     }
     else alert("این قسمت غیر فعال است");
 }
-if($data=="myInfo"){
+if($data=="myInfo" || (isset($text) && $text == $buttonValues['my_info'])){
     $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `userid` = ?");
     $stmt->bind_param("i", $from_id);
     $stmt->execute();
@@ -670,16 +670,15 @@ if($data=="myInfo"){
     
     $myWallet = number_format($userInfo['wallet']) . " تومان";
     
-    $keys = json_encode(['inline_keyboard'=>[
-        [
-            ['text'=>"شارژ کیف پول 💰",'callback_data'=>"increaseMyWallet"],
-            ['text'=>"انتقال موجودی",'callback_data'=>"transferMyWallet"]
+    $keys = json_encode([
+        'keyboard' => [
+            [['text' => $buttonValues['sharj']]], // دکمه شارژ کیف پول
+            [['text' => "انتقال موجودی"]],       // دکمه انتقال موجودی
+            [['text' => $buttonValues['back_to_main']]]  // دکمه بازگشت
         ],
-        [
-            ['text'=>$buttonValues['back_button'],'callback_data'=>"mainMenu"]
-            ]
-        ]]);
-    editText($message_id, "
+        'resize_keyboard' => true
+    ]);
+	    $responseText = "
 💞 اطلاعات حساب شما:
     
 🔰 شناسه کاربری: <code> $from_id </code>
@@ -688,18 +687,26 @@ if($data=="myInfo"){
 💰 موجودی: <code> $myWallet </code>
 
 ☑️ کل سرویس ها : <code> $totalBuys </code> عدد
-⁮⁮ ⁮⁮ ⁮⁮ ⁮⁮
-",
-            $keys,"html");
+";
+    
+if (isset($data)) {
+    // اگر از دکمه شیشه‌ای (قدیمی) بود، این پیام را ویرایش کن
+editText($message_id, $responseText, $keys, "html");
+    
+} else {
+    // اگر از کیبورد اصلی (جدید) بود، یک پیام جدید بفرست
+    sendMessage($responseText, $keys, "html");
 }
-if($data=="transferMyWallet"){
+   
+}
+if($data=="transferMyWallet" || (isset($text) && $text == "انتقال موجودی")){
     if($userInfo['wallet'] > 0 ){
         delMessage();
         sendMessage("لطفا آیدی عددی کاربر مورد نظر رو وارد کن",$cancelKey);
         setUser($data);
     }else alert("موجودی حساب شما کم است");
 }
-if($userInfo['step'] =="transferMyWallet" && $text != $buttonValues['cancel']){
+if(($userInfo['step'] =="transferMyWallet" || (isset($text) && $text == "انتقال موجودی")) && $text != $buttonValues['cancel']){
     if(is_numeric($text)){
         if($text != $from_id){
             $stmt= $connection->prepare("SELECT * FROM `users` WHERE `userid` = ?");
