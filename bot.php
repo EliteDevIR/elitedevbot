@@ -119,15 +119,12 @@ if(preg_match('/^\/([Ss]tart)/', $text) or $text == $buttonValues['back_to_main'
     setUser();
     setUser("", "temp"); 
     
-    // این بخش برای زمانی است که کاربر از یک منوی داخلی (با دکمه inline) به منوی اصلی برمی‌گردد
     if(isset($data) and $data == "mainMenu"){
-        $res = editText($message_id, $mainValues['start_message'], getMainKeys()); // <-- باید از تابع قدیمی inline استفاده کند
+        $res = editText($message_id, $mainValues['start_message'], getMainKeys());
         if(!$res->ok){
-            // اگر ویرایش پیام ممکن نبود، یک پیام جدید با کیبورد اصلی می‌فرستد
             sendMessage($mainValues['start_message'], getMainReplyKeys());
         }
     }
-    // این بخش برای زمانی است که کاربر دستور /start یا دکمه متنی "بازگشت" را می‌زند
     else{
         if($from_id != $admin && empty($userInfo['first_start'])){
             setUser('sent','first_start');
@@ -138,12 +135,12 @@ if(preg_match('/^\/([Ss]tart)/', $text) or $text == $buttonValues['back_to_main'
             sendMessage(str_replace(["FULLNAME", "USERNAME", "USERID"], ["<a href='tg://user?id=$from_id'>$first_name</a>", $username, $from_id], $mainValues['new_member_joined'])
                 ,$keys, "html",$admin);
         }
-        // پیام جدید با دکمه‌های کیبورد پایین صفحه ارسال می‌شود
         sendMessage($mainValues['start_message'], getMainReplyKeys());
     }
 }
-// =================== HANDELING REPLY KEYBOARD BUTTONS ===================
-if (isset($text)) {
+
+// =================== 3. کد "مترجم" حیاتی (باید دقیقاً اینجا باشد) ===================
+if (isset($text) && !isset($data)) {
     if($text == $buttonValues['buy_subscriptions']){
         $data = 'buySubscription';
     }
@@ -10298,7 +10295,6 @@ if($data == "managePanel" and (($from_id == $admin || $userInfo['isAdmin'] == tr
 👤 عزیزم به بخش مدیریت خوشومدی 
 🤌 هرچی نیاز داشتی میتونی اینجا طبق نیازهات اضافه و تغییر بدی ، عزیزم $first_name جان اگه از فروش ربات درآمد داری از من حمایت کن تا پروژه همیشه آپدیت بمونه !
 
-🆔 @wizwizch
 
 🚪 /start
 ";
