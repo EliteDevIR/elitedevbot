@@ -687,9 +687,9 @@ if($data=="myInfo" || $text == $buttonValues['my_info']){
 ⁮⁮ ⁮⁮ ⁮⁮ ⁮⁮
 ";
     if(isset($data)){
-        editText($message_id, $responseText, $keys,"html");
-    }else{
         sendMessage($responseText, $keys, "html");
+    }else{
+        editText($message_id, $responseText, $keys,"html");
     }
 }
 if($data=="transferMyWallet"){
