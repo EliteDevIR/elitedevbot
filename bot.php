@@ -4,71 +4,6 @@ check();
 
 $robotState = $botState['botState']??"on";
 
-// A mapping from button text to their old callback_data
-$buttonMap = [
-    $buttonValues['my_subscriptions'] => 'mySubscriptions',
-    $buttonValues['buy_subscriptions'] => 'buySubscription',
-    $buttonValues['request_agency'] => 'requestAgency',
-    $buttonValues['sharj'] => 'increaseMyWallet',
-    $buttonValues['invite_friends'] => 'inviteFriends',
-    $buttonValues['my_info'] => 'myInfo',
-    $buttonValues['shared_existence'] => 'availableServers',
-    $buttonValues['individual_existence'] => 'availableServers2',
-    $buttonValues['application_links'] => 'reciveApplications',
-    $buttonValues['my_tickets'] => 'supportSection',
-    $buttonValues['search_config'] => 'showUUIDLeft',
-    $buttonValues['agency_setting'] => 'agencySettings',
-    $buttonValues['agent_one_buy'] => 'agentOneBuy',
-    $buttonValues['agent_much_buy'] => 'agentMuchBuy',
-    $buttonValues['test_account'] => 'getTestAccount',
-    
-    // Admin buttons
-    "مدیریت ربات ⚙️" => 'managePanel',
-    $buttonValues['bot_reports'] => 'botReports',
-    $buttonValues['message_to_user'] => 'messageToSpeceficUser',
-    $buttonValues['user_reports'] => 'userReports',
-    $buttonValues['admins_list'] => 'adminsList',
-    $buttonValues['increase_wallet'] => 'increaseUserWallet',
-    $buttonValues['decrease_wallet'] => 'decreaseUserWallet',
-    $buttonValues['create_account'] => 'createMultipleAccounts',
-    $buttonValues['gift_volume_day'] => 'giftVolumeAndDay',
-    $buttonValues['ban_user'] => 'banUser',
-    $buttonValues['unban_user'] => 'unbanUser',
-    $buttonValues['search_admin_config'] => 'searchUsersConfig',
-    $buttonValues['server_settings'] => 'serversSetting',
-    $buttonValues['categories_settings'] => 'categoriesSetting',
-    $buttonValues['plan_settings'] => 'backplan',
-    $buttonValues['discount_settings'] => 'discount_codes',
-    $buttonValues['main_button_settings'] => 'mainMenuButtons',
-    $buttonValues['gateways_settings'] => 'gateWays_Channels',
-    $buttonValues['bot_settings'] => 'botSettings',
-    $buttonValues['tickets_list'] => 'ticketsList',
-    $buttonValues['message_to_all'] => 'message2All',
-    $buttonValues['forward_to_all'] => 'forwardToAll',
-    $buttonValues['agent_list'] => 'agentsList',
-    'درخواست های رد شده' => 'rejectedAgentList'
-];
-
-// Fetch custom buttons from DB and add to map
-$stmt = $connection->prepare("SELECT * FROM `setting` WHERE `type` LIKE '%MAIN_BUTTONS%'");
-$stmt->execute();
-$customButtons = $stmt->get_result();
-$stmt->close();
-if($customButtons->num_rows > 0){
-    while($row = $customButtons->fetch_assoc()){
-        $title = str_replace("MAIN_BUTTONS", "", $row['type']);
-        $buttonMap[$title] = "showMainButtonAns" . $row['id'];
-    }
-}
-
-// Convert text to data if it's a button press
-$isButtonMapped = false;
-if (isset($text) && isset($buttonMap[$text])) {
-    $data = $buttonMap[$text];
-    $isButtonMapped = true;
-}
-
-
 GOTOSTART:
 if ($userInfo['step'] == "banned" && $from_id != $admin && $userInfo['isAdmin'] != true) {
     sendMessage($mainValues['banned']);
@@ -529,10 +464,10 @@ if(preg_match('/^edit(RewaredTime|cartToCartAutoAcceptTime)/', $data, $match) &&
     sendMessage($txt,$cancelKey);
     setUser($data);
 }
-if($data=="userReports" && ($from_id == $admin || $userInfo['isAdmin'] == true)){
-    delMessage();
+if(($data=="userReports" || $text == $buttonValues['user_reports']) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
+    if(isset($data)) delMessage();
     sendMessage("🙃 | لطفا آیدی عددی کاربر رو وارد کن",$cancelKey);
-    setUser($data);
+    setUser("userReports");
 }
 if($userInfo['step'] == "userReports" && $text != $buttonValues['cancel'] && ($from_id == $admin || $userInfo['isAdmin'] == true)){
     if(is_numeric($text)){
@@ -696,12 +631,12 @@ if(preg_match('/^edit(RewaredTime|cartToCartAutoAcceptTime)/', $userInfo['step']
     setUser();
     exit();
 }
-if($data=="inviteFriends"){
+if($data=="inviteFriends" || $text == $buttonValues['invite_friends']){
     $stmt = $connection->prepare("SELECT * FROM `setting` WHERE `type` = 'INVITE_BANNER_TEXT'");
     $stmt->execute();
     $inviteText = $stmt->get_result()->fetch_assoc()['value'];
     if($inviteText != null){
-        delMessage();
+        if(isset($data)) delMessage();
         $inviteText = json_decode($inviteText,true);
     
         $stmt = $connection->prepare("SELECT * FROM `setting` WHERE `type` = 'INVITE_BANNER_AMOUNT'");
@@ -726,7 +661,7 @@ if($data=="inviteFriends"){
     }
     else alert("این قسمت غیر فعال است");
 }
-if($data=="myInfo"){
+if($data=="myInfo" || $text == $buttonValues['my_info']){
     $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `userid` = ?");
     $stmt->bind_param("i", $from_id);
     $stmt->execute();
@@ -744,7 +679,7 @@ if($data=="myInfo"){
             ['text'=>$buttonValues['back_button'],'callback_data'=>"mainMenu"]
             ]
         ]]);
-    editText($message_id, "
+    $responseText = "
 💞 اطلاعات حساب شما:
     
 🔰 شناسه کاربری: <code> $from_id </code>
@@ -754,8 +689,12 @@ if($data=="myInfo"){
 
 ☑️ کل سرویس ها : <code> $totalBuys </code> عدد
 ⁮⁮ ⁮⁮ ⁮⁮ ⁮⁮
-",
-            $keys,"html");
+";
+    if(isset($data)){
+        editText($message_id, $responseText, $keys,"html");
+    }else{
+        sendMessage($responseText, $keys, "html");
+    }
 }
 if($data=="transferMyWallet"){
     if($userInfo['wallet'] > 0 ){
@@ -802,10 +741,10 @@ if(preg_match('/^tranfserUserAmount(\d+)/',$userInfo['step'],$match) && $text !=
         }else sendMessage("لطفا عددی بزرگتر از صفر وارد کنید");
     }else sendMessage($mainValues['send_only_number']);
 }
-if($data=="increaseMyWallet"){
-    delMessage();
+if($data=="increaseMyWallet" || $text == $buttonValues['sharj']){
+    if(isset($data)) delMessage();
     sendMessage("🙂 عزیزم مقدار شارژ مورد نظر خود را به تومان وارد کن (بیشتر از 5000 تومان)",$cancelKey);
-    setUser($data);
+    setUser("increaseMyWallet");
 }
 if($userInfo['step'] == "increaseMyWallet" && $text != $buttonValues['cancel']){
     if(!is_numeric($text)){
