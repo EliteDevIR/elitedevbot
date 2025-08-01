@@ -10260,7 +10260,4 @@ if ($text == $buttonValues['cancel']) {
     sendMessage($mainValues['waiting_message'], $removeKeyboard);
     sendMessage($mainValues['reached_main_menu'],getMainKeys());
 }
-if(isset($text) && $userInfo['step'] == 'none' && !preg_match('/^\/([Ss]tart)/', $text) && $text != $buttonValues['cancel'] && !$isButtonMapped){
-    sendMessage($mainValues['please_select_from_below_buttons']);
-}
 ?>
