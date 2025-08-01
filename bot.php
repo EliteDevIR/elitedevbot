@@ -693,7 +693,7 @@ if($data=="myInfo" || $text == $buttonValues['my_info']){
     if(isset($data)){
         editText($message_id, $responseText, $keys,"html");
     }else{
-        sendMessage($responseText, $keys, "html");
+        sendMessage($responseText, $keys);
     }
 }
 if($data=="transferMyWallet"){
