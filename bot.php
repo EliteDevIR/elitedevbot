@@ -4,6 +4,55 @@ check();
 
 $robotState = $botState['botState']??"on";
 
+// A mapping from button text to their old callback_data
+$buttonMap = [
+    $buttonValues['my_subscriptions'] => 'mySubscriptions',
+    $buttonValues['buy_subscriptions'] => 'buySubscription',
+    $buttonValues['request_agency'] => 'requestAgency',
+    $buttonValues['sharj'] => 'increaseMyWallet',
+    $buttonValues['invite_friends'] => 'inviteFriends',
+    $buttonValues['my_info'] => 'myInfo',
+    $buttonValues['shared_existence'] => 'availableServers',
+    $buttonValues['individual_existence'] => 'availableServers2',
+    $buttonValues['application_links'] => 'reciveApplications',
+    $buttonValues['my_tickets'] => 'supportSection',
+    $buttonValues['search_config'] => 'showUUIDLeft',
+    $buttonValues['agency_setting'] => 'agencySettings',
+    $buttonValues['agent_one_buy'] => 'agentOneBuy',
+    $buttonValues['agent_much_buy'] => 'agentMuchBuy',
+    $buttonValues['test_account'] => 'getTestAccount',
+    
+    // Admin buttons
+    "مدیریت ربات ⚙️" => 'managePanel',
+    $buttonValues['bot_reports'] => 'botReports',
+    $buttonValues['message_to_user'] => 'messageToSpeceficUser',
+    $buttonValues['user_reports'] => 'userReports',
+    $buttonValues['admins_list'] => 'adminsList',
+    $buttonValues['increase_wallet'] => 'increaseUserWallet',
+    $buttonValues['decrease_wallet'] => 'decreaseUserWallet',
+    $buttonValues['create_account'] => 'createMultipleAccounts',
+    $buttonValues['gift_volume_day'] => 'giftVolumeAndDay',
+    $buttonValues['ban_user'] => 'banUser',
+    $buttonValues['unban_user'] => 'unbanUser',
+    $buttonValues['search_admin_config'] => 'searchUsersConfig',
+    $buttonValues['server_settings'] => 'serversSetting',
+    $buttonValues['categories_settings'] => 'categoriesSetting',
+    $buttonValues['plan_settings'] => 'backplan',
+    $buttonValues['discount_settings'] => 'discount_codes',
+    $buttonValues['main_button_settings'] => 'mainMenuButtons',
+    $buttonValues['gateways_settings'] => 'gateWays_Channels',
+    $buttonValues['bot_settings'] => 'botSettings',
+    $buttonValues['tickets_list'] => 'ticketsList',
+    $buttonValues['message_to_all'] => 'message2All',
+    $buttonValues['forward_to_all'] => 'forwardToAll',
+    $buttonValues['agent_list'] => 'agentsList',
+    'درخواست های رد شده' => 'rejectedAgentList'
+];
+
+if (isset($text) && isset($buttonMap[$text])) {
+    $data = $buttonMap[$text]; // Convert text from keyboard to a virtual callback data
+}
+
 GOTOSTART:
 if ($userInfo['step'] == "banned" && $from_id != $admin && $userInfo['isAdmin'] != true) {
     sendMessage($mainValues['banned']);
@@ -10220,6 +10269,8 @@ if($data == "managePanel" and (($from_id == $admin || $userInfo['isAdmin'] == tr
     $msg = "
 👤 عزیزم به بخش مدیریت خوشومدی 
 🤌 هرچی نیاز داشتی میتونی اینجا طبق نیازهات اضافه و تغییر بدی ، عزیزم $first_name جان اگه از فروش ربات درآمد داری از من حمایت کن تا پروژه همیشه آپدیت بمونه !
+
+🆔 @wizwizch
 
 🚪 /start
 ";
