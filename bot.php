@@ -661,7 +661,7 @@ if($data=="inviteFriends"){
     }
     else alert("این قسمت غیر فعال است");
 }
-if($data=="myInfo" || (isset($text) && $text == $buttonValues['my_info'])){
+if($data=="myInfo"){
     $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `userid` = ?");
     $stmt->bind_param("i", $from_id);
     $stmt->execute();
@@ -670,15 +670,16 @@ if($data=="myInfo" || (isset($text) && $text == $buttonValues['my_info'])){
     
     $myWallet = number_format($userInfo['wallet']) . " تومان";
     
-    $keys = json_encode([
-        'keyboard' => [
-            [['text' => $buttonValues['sharj']]], // دکمه شارژ کیف پول
-            [['text' => "انتقال موجودی"]],       // دکمه انتقال موجودی
-            [['text' => $buttonValues['back_to_main']]]  // دکمه بازگشت
+    $keys = json_encode(['inline_keyboard'=>[
+        [
+            ['text'=>"شارژ کیف پول 💰",'callback_data'=>"increaseMyWallet"],
+            ['text'=>"انتقال موجودی",'callback_data'=>"transferMyWallet"]
         ],
-        'resize_keyboard' => true
-    ]);
-	    $responseText = "
+        [
+            ['text'=>$buttonValues['back_button'],'callback_data'=>"mainMenu"]
+            ]
+        ]]);
+    editText($message_id, "
 💞 اطلاعات حساب شما:
     
 🔰 شناسه کاربری: <code> $from_id </code>
@@ -687,19 +688,11 @@ if($data=="myInfo" || (isset($text) && $text == $buttonValues['my_info'])){
 💰 موجودی: <code> $myWallet </code>
 
 ☑️ کل سرویس ها : <code> $totalBuys </code> عدد
-";
-    
-if (isset($data)) {
-    // اگر از دکمه شیشه‌ای (قدیمی) بود، این پیام را ویرایش کن
-editText($message_id, $responseText, $keys, "html");
-    
-} else {
-    // اگر از کیبورد اصلی (جدید) بود، یک پیام جدید بفرست
-    sendMessage($responseText, $keys, "html");
+⁮⁮ ⁮⁮ ⁮⁮ ⁮⁮
+",
+            $keys,"html");
 }
-   
-}
-if($data=="transferMyWallet" || $text == "انتقال موجودی"){
+if($data=="transferMyWallet"){
     if($userInfo['wallet'] > 0 ){
         delMessage();
         sendMessage("لطفا آیدی عددی کاربر مورد نظر رو وارد کن",$cancelKey);
@@ -10228,6 +10221,7 @@ if($data == "managePanel" and (($from_id == $admin || $userInfo['isAdmin'] == tr
 👤 عزیزم به بخش مدیریت خوشومدی 
 🤌 هرچی نیاز داشتی میتونی اینجا طبق نیازهات اضافه و تغییر بدی ، عزیزم $first_name جان اگه از فروش ربات درآمد داری از من حمایت کن تا پروژه همیشه آپدیت بمونه !
 
+🆔 @wizwizch
 
 🚪 /start
 ";
