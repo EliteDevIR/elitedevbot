@@ -706,7 +706,7 @@ if($data=="transferMyWallet" || (isset($text) && $text == "انتقال موجو
         setUser($data);
     }else alert("موجودی حساب شما کم است");
 }
-if($userInfo['step'] =="transferMyWallet" || $text == "انتقال موجودی" && $text != $buttonValues['cancel']){
+if($userInfo['step'] =="transferMyWallet" && $text != $buttonValues['cancel']){
     if(is_numeric($text)){
         if($text != $from_id){
             $stmt= $connection->prepare("SELECT * FROM `users` WHERE `userid` = ?");
