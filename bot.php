@@ -17,11 +17,6 @@ if(is_numeric($checkSpam)){
 }
 // =================== 3. کد "مترجم" حیاتی (باید دقیقاً اینجا باشد) ===================
 if (isset($text) && !isset($data)) {
-	// START: کد عیب‌یابی را اینجا اضافه کنید
-    sendMessage("متن دریافت شده از تلگرام: '" . $text . "'");
-    sendMessage("متن دکمه خرید از تنظیمات: '" . $buttonValues['buy_subscriptions'] . "'");
-    exit(); // اسکریپت را متوقف می‌کنیم تا فقط نتیجه تست را ببینیم
-    // END: پایان کد عیب‌یابی
     if($text == $buttonValues['buy_subscriptions']){
         $data = 'buySubscription';
     }
