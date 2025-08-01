@@ -384,7 +384,7 @@ $buttonValues = [
     'invite_friends'=>"🏆 دعوت از دوستان",
     'my_info'=>"👤 حساب کاربری",
     'my_subscriptions'=>'📲 کانفیگ‌های من',
-    'buy_subscriptions'=>'🛍️ خرید سرویس جدید',
+    'buy_subscriptions' => 'خرید اشتراک',
     'shared_existence'=>"🏦 موجودی اشتراکی",
     'individual_existence'=>"💰 موجودی اختصاصی",
     'application_links'=>'📱 آموزش اتصال',
