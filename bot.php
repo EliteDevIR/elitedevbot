@@ -750,9 +750,10 @@ if(preg_match('/^tranfserUserAmount(\d+)/',$userInfo['step'],$match) && $text !=
     }else sendMessage($mainValues['send_only_number']);
 }
 if($data=="increaseMyWallet" || (isset($text) && $text == $buttonValues['sharj'])){
-    delMessage();
+    $requestHandled = true;
+    if(isset($data)) delMessage();
     sendMessage("🙂 عزیزم مقدار شارژ مورد نظر خود را به تومان وارد کن (بیشتر از 5000 تومان)",$cancelKey);
-    setUser($data);
+    setUser("increaseMyWallet");
 }
 if($userInfo['step'] == "increaseMyWallet" && $text != $buttonValues['cancel']){
     if(!is_numeric($text)){
@@ -787,9 +788,9 @@ if($userInfo['step'] == "increaseMyWallet" && $text != $buttonValues['cancel']){
     if($botState['tronWallet'] == "on") $keyboard[] = [['text' => $buttonValues['tron_gateway'],  'callback_data' => "payWithTronWallet" . $hash_id]];
 
     $keyboard[] = [['text'=>$buttonValues['cancel'], 'callback_data'=> "mainMenu"]];
-
+     
     
-	$keys = json_encode(['inline_keyboard'=>$keyboard]);
+	$keys = json_encode([['keyboard'=>$keyboard]],'resize_keyboard' => true);
     sendMessage("اطلاعات شارژ:\nمبلغ ". number_format($text) . " تومان\n\nلطفا روش پرداخت را انتخاب کنید",$keys);
     setUser();
 }
