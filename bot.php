@@ -674,9 +674,9 @@ if($data == 'myInfo' || (isset($text) && $text == $buttonValues['my_info'])) {
 
     $keys = json_encode([
     'keyboard' => [
-        [['text' => $buttonValues['sharj']]], // دکمه شارژ کیف پول
-        [['text' => "انتقال موجودی"]],       // دکمه انتقال موجودی
-        [['text' => $buttonValues['back_to_main']]]  // دکمه بازگشت
+        [['text' => $buttonValues['sharj'],'callback_data'=>"increaseMyWallet"]], // دکمه شارژ کیف پول
+        [['text' => "انتقال موجودی",'callback_data'=>"transferMyWallet"]],       // دکمه انتقال موجودی
+        [['text' => $buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]  // دکمه بازگشت
     ],
     'resize_keyboard' => true
     ]);
