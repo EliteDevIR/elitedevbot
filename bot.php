@@ -688,10 +688,10 @@ if($data=="myInfo" || $text == $buttonValues['my_info']){
 ";
     if(isset($data)){
 	editText($message_id, $responseText, $keys,"html");
-	editKeys($keys,$message_id,"html")
+	
     }else{
         sendMessage($responseText, $keys, "html");
-	editKeys($keys,$message_id,"html")
+	
     }
 }
 if($data=="transferMyWallet"){
