@@ -5,37 +5,6 @@ check();
 $robotState = $botState['botState']??"on";
 
 GOTOSTART:
-if ($userInfo['step'] == "banned" && $from_id != $admin && $userInfo['isAdmin'] != true) {
-    sendMessage($mainValues['banned']);
-    exit();
-}
-$checkSpam = checkSpam();
-if(is_numeric($checkSpam)){
-    $time = jdate("Y-m-d H:i:s", $checkSpam);
-    sendMessage("اکانت شما به دلیل اسپم مسدود شده است\nزمان آزادسازی اکانت شما: \n$time");
-    exit();
-}
-if(preg_match("/^haveJoined(.*)/",$data,$match)){
-    if ($joniedState== "kicked" || $joniedState== "left"){
-        alert($mainValues['not_joine_yet']);
-        exit();
-    }else{
-        delMessage();
-        $text = $match[1];
-    }
-}
-if (($joniedState== "kicked" || $joniedState== "left") && $from_id != $admin){
-    sendMessage(str_replace("CHANNEL-ID", $channelLock, $mainValues['join_channel_message']), json_encode(['inline_keyboard'=>[
-        [['text'=>$buttonValues['join_channel'],'url'=>"https://t.me/" . str_replace("@", "", $botState['lockChannel'])]],
-        [['text'=>$buttonValues['have_joined'],'callback_data'=>'haveJoined' . $text]],
-        ]]),"HTML");
-    exit;
-}
-if($robotState == "off" && $from_id != $admin){
-    sendMessage($mainValues['bot_is_updating']);
-    exit();
-}
-
 // START of new code block
 if(isset($text)){
     $buttonKey = array_search($text, $buttonValues);
@@ -77,7 +46,6 @@ if(isset($text)){
         $stmt->close();
         if($customButton->num_rows > 0){
             $answer = $customButton->fetch_assoc()['value'];
-            // Since this is a reply keyboard, we can't go "back" easily, so we just show the main menu again.
             sendMessage($answer, getMainKeys()); 
             exit(); 
         }
@@ -90,6 +58,36 @@ if(isset($text)){
 }
 // END of new code block
 
+if ($userInfo['step'] == "banned" && $from_id != $admin && $userInfo['isAdmin'] != true) {
+    sendMessage($mainValues['banned']);
+    exit();
+}
+$checkSpam = checkSpam();
+if(is_numeric($checkSpam)){
+    $time = jdate("Y-m-d H:i:s", $checkSpam);
+    sendMessage("اکانت شما به دلیل اسپم مسدود شده است\nزمان آزادسازی اکانت شما: \n$time");
+    exit();
+}
+if(preg_match("/^haveJoined(.*)/",$data,$match)){
+    if ($joniedState== "kicked" || $joniedState== "left"){
+        alert($mainValues['not_joine_yet']);
+        exit();
+    }else{
+        delMessage();
+        $text = $match[1];
+    }
+}
+if (($joniedState== "kicked" || $joniedState== "left") && $from_id != $admin){
+    sendMessage(str_replace("CHANNEL-ID", $channelLock, $mainValues['join_channel_message']), json_encode(['inline_keyboard'=>[
+        [['text'=>$buttonValues['join_channel'],'url'=>"https://t.me/" . str_replace("@", "", $botState['lockChannel'])]],
+        [['text'=>$buttonValues['have_joined'],'callback_data'=>'haveJoined' . $text]],
+        ]]),"HTML");
+    exit;
+}
+if($robotState == "off" && $from_id != $admin){
+    sendMessage($mainValues['bot_is_updating']);
+    exit();
+}
 if(strstr($text, "/start ")){
     $inviter = str_replace("/start ", "", $text);
     if($inviter < 0) exit();
