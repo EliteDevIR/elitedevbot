@@ -115,25 +115,28 @@ if($userInfo['phone'] == null && $from_id != $admin && $userInfo['isAdmin'] != t
 		exit();
     }
 }
-if(preg_match('/^\/([Ss]tart)/', $text) or $text == $buttonValues['back_to_main'] or $data == 'mainMenu') {
+if(preg_match('/^\/([Ss]tart)/', $text) or (isset($text) && $text == $buttonValues['back_to_main']) or $data == 'mainMenu') {
+    // پاک کردن مراحل قبلی کاربر
     setUser();
-    setUser("", "temp"); 
-    if(isset($data) and $data == "mainMenu"){
+    setUser("", "temp");
+    
+    // بررسی اینکه دستور از دکمه شیشه‌ای قدیمی آمده یا کیبورد جدید
+    if (isset($data) and $data == "mainMenu") {
+        // اگر از دکمه شیشه‌ای (قدیمی) بود، این پیام را ویرایش کن
         $res = editText($message_id, $mainValues['start_message'], getMainKeys());
-        if(!$res->ok){
+        if (!$res->ok) {
             sendMessage($mainValues['start_message'], getMainKeys());
         }
-    }else{
-        if($from_id != $admin && empty($userInfo['first_start'])){
-            setUser('sent','first_start');
-            $keys = json_encode(['inline_keyboard'=>[
-                [['text'=>$buttonValues['send_message_to_user'],'callback_data'=>'sendMessageToUser' . $from_id]]
+    } else {
+        // اگر دستور /start یا دکمه از کیبورد اصلی (جدید) بود، یک پیام جدید بفرست
+        if ($from_id != $admin && empty($userInfo['first_start'])) {
+            setUser('sent', 'first_start');
+            $keys = json_encode(['inline_keyboard' => [
+                [['text' => $buttonValues['send_message_to_user'], 'callback_data' => 'sendMessageToUser' . $from_id]]
             ]]);
-    
-            sendMessage(str_replace(["FULLNAME", "USERNAME", "USERID"], ["<a href='tg://user?id=$from_id'>$first_name</a>", $username, $from_id], $mainValues['new_member_joined'])
-                ,$keys, "html",$admin);
+            sendMessage(str_replace(["FULLNAME", "USERNAME", "USERID"], ["<a href='tg://user?id=$from_id'>$first_name</a>", $username, $from_id], $mainValues['new_member_joined']), $keys, "html", $admin);
         }
-        sendMessage($mainValues['start_message'],getMainKeys());
+        sendMessage($mainValues['start_message'], getMainKeys());
     }
 }
 if(preg_match('/^sendMessageToUser(\d+)/',$data,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true) && $text != $buttonValues['cancel']){
