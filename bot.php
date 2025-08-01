@@ -670,11 +670,10 @@ if($data=="myInfo" || $text == $buttonValues['my_info']){
     
     $myWallet = number_format($userInfo['wallet']) . " تومان";
     
-    $keys = json_encode(['keyboard' => [
-        [['text' => $buttonValues['sharj']]],
-        [['text' => "انتقال موجودی"]],
-        [['text' => $buttonValues['back_button']]],
-	'resize_keyboard' => true
+    $keys = json_encode(['inline_keyboard' => [
+        [['text' => $buttonValues['sharj'], 'callback_data' => "increaseMyWallet"]],
+        [['text' => "انتقال موجودی", 'callback_data' => "transferMyWallet"]],
+        [['text' => $buttonValues['back_button'], 'callback_data' => "mainMenu"]]
     ]]);
     $responseText = "
 💞 اطلاعات حساب شما:
@@ -689,8 +688,10 @@ if($data=="myInfo" || $text == $buttonValues['my_info']){
 ";
     if(isset($data)){
 	editText($message_id, $responseText, $keys,"html");
+	editKeys($keys,$message_id,"html")
     }else{
         sendMessage($responseText, $keys, "html");
+	editKeys($keys,$message_id,"html")
     }
 }
 if($data=="transferMyWallet"){
