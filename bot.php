@@ -699,7 +699,7 @@ editText($message_id, $responseText, $keys, "html");
 }
    
 }
-if($data=="transferMyWallet" || (isset($text) && $text == "انتقال موجودی")){
+if($data=="transferMyWallet" || $text == "انتقال موجودی"){
     if($userInfo['wallet'] > 0 ){
         delMessage();
         sendMessage("لطفا آیدی عددی کاربر مورد نظر رو وارد کن",$cancelKey);
