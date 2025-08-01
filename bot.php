@@ -118,12 +118,17 @@ if($userInfo['phone'] == null && $from_id != $admin && $userInfo['isAdmin'] != t
 if(preg_match('/^\/([Ss]tart)/', $text) or $text == $buttonValues['back_to_main'] or $data == 'mainMenu') {
     setUser();
     setUser("", "temp"); 
+    
+    // این بخش برای زمانی است که کاربر از یک منوی داخلی (با دکمه inline) به منوی اصلی برمی‌گردد
     if(isset($data) and $data == "mainMenu"){
-        $res = editText($message_id, $mainValues['start_message'], getMainReplyKeys());
+        $res = editText($message_id, $mainValues['start_message'], getMainKeys()); // <-- باید از تابع قدیمی inline استفاده کند
         if(!$res->ok){
+            // اگر ویرایش پیام ممکن نبود، یک پیام جدید با کیبورد اصلی می‌فرستد
             sendMessage($mainValues['start_message'], getMainReplyKeys());
         }
-    }else{
+    }
+    // این بخش برای زمانی است که کاربر دستور /start یا دکمه متنی "بازگشت" را می‌زند
+    else{
         if($from_id != $admin && empty($userInfo['first_start'])){
             setUser('sent','first_start');
             $keys = json_encode(['inline_keyboard'=>[
@@ -133,7 +138,8 @@ if(preg_match('/^\/([Ss]tart)/', $text) or $text == $buttonValues['back_to_main'
             sendMessage(str_replace(["FULLNAME", "USERNAME", "USERID"], ["<a href='tg://user?id=$from_id'>$first_name</a>", $username, $from_id], $mainValues['new_member_joined'])
                 ,$keys, "html",$admin);
         }
-        sendMessage($mainValues['start_message'],getMainReplyKeys());
+        // پیام جدید با دکمه‌های کیبورد پایین صفحه ارسال می‌شود
+        sendMessage($mainValues['start_message'], getMainReplyKeys());
     }
 }
 // =================== HANDELING REPLY KEYBOARD BUTTONS ===================
