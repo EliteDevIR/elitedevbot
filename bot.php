@@ -15,77 +15,6 @@ if(is_numeric($checkSpam)){
     sendMessage("اکانت شما به دلیل اسپم مسدود شده است\nزمان آزادسازی اکانت شما: \n$time");
     exit();
 }
-// =================== 3. کد "مترجم" حیاتی (باید دقیقاً اینجا باشد) ===================
-if (isset($text) && !isset($data)) {
-    if($text == $buttonValues['buy_subscriptions']){
-        $data = 'buySubscription';
-    }
-    elseif($text == $buttonValues['my_subscriptions'] && !($userInfo['is_agent'] == 1)){
-        $data = 'mySubscriptions';
-    }
-    elseif($text == $buttonValues['my_subscriptions'] && $userInfo['is_agent'] == 1){
-        $data = 'agentConfigsList';
-    }
-    elseif($text == $buttonValues['my_info']){
-        $data = 'myInfo';
-    }
-    elseif($text == $buttonValues['sharj']){
-        $data = 'increaseMyWallet';
-    }
-    elseif($text == $buttonValues['invite_friends']){
-        $data = 'inviteFriends';
-    }
-    elseif($text == $buttonValues['test_account']){
-        $data = 'getTestAccount';
-    }
-    elseif($text == $buttonValues['my_tickets']){
-        $data = 'supportSection';
-    }
-    elseif($text == $buttonValues['application_links']){
-        $data = 'reciveApplications';
-    }
-    elseif($text == $buttonValues['search_config']){
-        $data = 'showUUIDLeft';
-    }
-    elseif($text == $buttonValues['agency_setting']){
-        $data = 'agencySettings';
-    }
-    elseif($text == $buttonValues['request_agency']){
-        $data = 'requestAgency';
-    }
-    elseif($text == $buttonValues['agent_one_buy']){
-        $data = 'agentOneBuy';
-    }
-    elseif($text == $buttonValues['agent_much_buy']){
-        $data = 'agentMuchBuy';
-    }
-    elseif($text == "مدیریت ربات ⚙️" && ($from_id == $admin || $userInfo['isAdmin'] == true)){
-        $data = 'managePanel';
-    }
-    elseif($text == $buttonValues['shared_existence']){
-        $data = 'availableServers';
-    }
-    elseif($text == $buttonValues['individual_existence']){
-        $data = 'availableServers2';
-    }
-    else{
-        $stmt = $connection->prepare("SELECT * FROM `setting` WHERE `type` LIKE '%MAIN_BUTTONS%'");
-        $stmt->execute();
-        $buttons = $stmt->get_result();
-        $stmt->close();
-        if($buttons->num_rows > 0){
-            while($row = $buttons->fetch_assoc()){
-                $rowId = $row['id'];
-                $title = str_replace("MAIN_BUTTONS","",$row['type']);
-                if($text == $title){
-                    $data = "showMainButtonAns" . $rowId;
-                    break;
-                }
-            }
-        }
-    }
-}
-// =======================================================================
 if(preg_match("/^haveJoined(.*)/",$data,$match)){
     if ($joniedState== "kicked" || $joniedState== "left"){
         alert($mainValues['not_joine_yet']);
@@ -189,14 +118,12 @@ if($userInfo['phone'] == null && $from_id != $admin && $userInfo['isAdmin'] != t
 if(preg_match('/^\/([Ss]tart)/', $text) or $text == $buttonValues['back_to_main'] or $data == 'mainMenu') {
     setUser();
     setUser("", "temp"); 
-    
     if(isset($data) and $data == "mainMenu"){
         $res = editText($message_id, $mainValues['start_message'], getMainKeys());
         if(!$res->ok){
-            sendMessage($mainValues['start_message'], getMainReplyKeys());
+            sendMessage($mainValues['start_message'], getMainKeys());
         }
-    }
-    else{
+    }else{
         if($from_id != $admin && empty($userInfo['first_start'])){
             setUser('sent','first_start');
             $keys = json_encode(['inline_keyboard'=>[
@@ -206,7 +133,7 @@ if(preg_match('/^\/([Ss]tart)/', $text) or $text == $buttonValues['back_to_main'
             sendMessage(str_replace(["FULLNAME", "USERNAME", "USERID"], ["<a href='tg://user?id=$from_id'>$first_name</a>", $username, $from_id], $mainValues['new_member_joined'])
                 ,$keys, "html",$admin);
         }
-        sendMessage($mainValues['start_message'], getMainReplyKeys());
+        sendMessage($mainValues['start_message'],getMainKeys());
     }
 }
 if(preg_match('/^sendMessageToUser(\d+)/',$data,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true) && $text != $buttonValues['cancel']){
@@ -10293,6 +10220,8 @@ if($data == "managePanel" and (($from_id == $admin || $userInfo['isAdmin'] == tr
     $msg = "
 👤 عزیزم به بخش مدیریت خوشومدی 
 🤌 هرچی نیاز داشتی میتونی اینجا طبق نیازهات اضافه و تغییر بدی ، عزیزم $first_name جان اگه از فروش ربات درآمد داری از من حمایت کن تا پروژه همیشه آپدیت بمونه !
+
+🆔 @wizwizch
 
 🚪 /start
 ";
