@@ -672,7 +672,7 @@ if($data == 'myInfo' || (isset($text) && $text == $buttonValues['my_info'])) {
 
     $myWallet = number_format($userInfo['wallet']) . " تومان";
 
-    $keys = json_encode([
+   $keys = json_encode([
     'keyboard' => [
         [['text' => $buttonValues['sharj'],'callback_data'=>"increaseMyWallet"]], // دکمه شارژ کیف پول
         [['text' => "انتقال موجودی",'callback_data'=>"transferMyWallet"]],       // دکمه انتقال موجودی
@@ -692,16 +692,16 @@ if($data == 'myInfo' || (isset($text) && $text == $buttonValues['my_info'])) {
 ☑️ کل سرویس ها : <code> $totalBuys </code> عدد
 ";
     
-    if (isset($data)) {
-        // اگر از دکمه شیشه‌ای (قدیمی) بود، این پیام را ویرایش کن
-	editText($message_id, $responseText, $keys, "html");
-        
-    } else {
-        // اگر از کیبورد اصلی (جدید) بود، یک پیام جدید بفرست
-        sendMessage($responseText, $keys, "html");
-    }
+if (isset($data)) {
+    // اگر از دکمه شیشه‌ای (قدیمی) بود، این پیام را ویرایش کن
+editText($message_id, $responseText, $keys, "html");
+    
+} else {
+    // اگر از کیبورد اصلی (جدید) بود، یک پیام جدید بفرست
+    sendMessage($responseText, $keys, "html");
 }
-if($data=="transferMyWallet"){
+}
+if($data=="transferMyWallet" || (isset($text) && $text == "انتقال موجودی")){
     if($userInfo['wallet'] > 0 ){
         delMessage();
         sendMessage("لطفا آیدی عددی کاربر مورد نظر رو وارد کن",$cancelKey);
@@ -746,10 +746,11 @@ if(preg_match('/^tranfserUserAmount(\d+)/',$userInfo['step'],$match) && $text !=
         }else sendMessage("لطفا عددی بزرگتر از صفر وارد کنید");
     }else sendMessage($mainValues['send_only_number']);
 }
-if($data=="increaseMyWallet"){
-    delMessage();
+if($data=="increaseMyWallet" || (isset($text) && $text == $buttonValues['sharj'])){
+    $requestHandled = true;
+    if(isset($data)) delMessage();
     sendMessage("🙂 عزیزم مقدار شارژ مورد نظر خود را به تومان وارد کن (بیشتر از 5000 تومان)",$cancelKey);
-    setUser($data);
+    setUser("increaseMyWallet");
 }
 if($userInfo['step'] == "increaseMyWallet" && $text != $buttonValues['cancel']){
     if(!is_numeric($text)){
@@ -784,9 +785,9 @@ if($userInfo['step'] == "increaseMyWallet" && $text != $buttonValues['cancel']){
     if($botState['tronWallet'] == "on") $keyboard[] = [['text' => $buttonValues['tron_gateway'],  'callback_data' => "payWithTronWallet" . $hash_id]];
 
     $keyboard[] = [['text'=>$buttonValues['cancel'], 'callback_data'=> "mainMenu"]];
-
+     
     
-	$keys = json_encode(['inline_keyboard'=>$keyboard]);
+	$keys = json_encode([['keyboard'=>$keyboard]],'resize_keyboard' => true);
     sendMessage("اطلاعات شارژ:\nمبلغ ". number_format($text) . " تومان\n\nلطفا روش پرداخت را انتخاب کنید",$keys);
     setUser();
 }
