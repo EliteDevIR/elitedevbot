@@ -464,10 +464,10 @@ if(preg_match('/^edit(RewaredTime|cartToCartAutoAcceptTime)/', $data, $match) &&
     sendMessage($txt,$cancelKey);
     setUser($data);
 }
-if(($data=="userReports" || $text == $buttonValues['user_reports']) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
-    if(isset($data)) delMessage();
+if($data=="userReports" && ($from_id == $admin || $userInfo['isAdmin'] == true)){
+    delMessage();
     sendMessage("🙃 | لطفا آیدی عددی کاربر رو وارد کن",$cancelKey);
-    setUser("userReports");
+    setUser($data);
 }
 if($userInfo['step'] == "userReports" && $text != $buttonValues['cancel'] && ($from_id == $admin || $userInfo['isAdmin'] == true)){
     if(is_numeric($text)){
@@ -631,12 +631,12 @@ if(preg_match('/^edit(RewaredTime|cartToCartAutoAcceptTime)/', $userInfo['step']
     setUser();
     exit();
 }
-if($data=="inviteFriends" || $text == $buttonValues['invite_friends']){
+if($data=="inviteFriends"){
     $stmt = $connection->prepare("SELECT * FROM `setting` WHERE `type` = 'INVITE_BANNER_TEXT'");
     $stmt->execute();
     $inviteText = $stmt->get_result()->fetch_assoc()['value'];
     if($inviteText != null){
-        if(isset($data)) delMessage();
+        delMessage();
         $inviteText = json_decode($inviteText,true);
     
         $stmt = $connection->prepare("SELECT * FROM `setting` WHERE `type` = 'INVITE_BANNER_AMOUNT'");
@@ -661,7 +661,7 @@ if($data=="inviteFriends" || $text == $buttonValues['invite_friends']){
     }
     else alert("این قسمت غیر فعال است");
 }
-if($data=="myInfo" || $text == $buttonValues['my_info']){
+if($data=="myInfo"){
     $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `userid` = ?");
     $stmt->bind_param("i", $from_id);
     $stmt->execute();
@@ -670,12 +670,16 @@ if($data=="myInfo" || $text == $buttonValues['my_info']){
     
     $myWallet = number_format($userInfo['wallet']) . " تومان";
     
-    $keys = json_encode(['inline_keyboard' => [
-        [['text' => $buttonValues['sharj'], 'callback_data' => "increaseMyWallet"]],
-        [['text' => "انتقال موجودی", 'callback_data' => "transferMyWallet"]],
-        [['text' => $buttonValues['back_button'], 'callback_data' => "mainMenu"]]
-    ]]);
-    $responseText = "
+    $keys = json_encode(['inline_keyboard'=>[
+        [
+            ['text'=>"شارژ کیف پول 💰",'callback_data'=>"increaseMyWallet"],
+            ['text'=>"انتقال موجودی",'callback_data'=>"transferMyWallet"]
+        ],
+        [
+            ['text'=>$buttonValues['back_button'],'callback_data'=>"mainMenu"]
+            ]
+        ]]);
+    editText($message_id, "
 💞 اطلاعات حساب شما:
     
 🔰 شناسه کاربری: <code> $from_id </code>
@@ -685,14 +689,8 @@ if($data=="myInfo" || $text == $buttonValues['my_info']){
 
 ☑️ کل سرویس ها : <code> $totalBuys </code> عدد
 ⁮⁮ ⁮⁮ ⁮⁮ ⁮⁮
-";
-    if(isset($data)){
-	editText($message_id, $responseText, $keys,"html");
-	
-    }else{
-        sendMessage($responseText, $keys, "html");
-	
-    }
+",
+            $keys,"html");
 }
 if($data=="transferMyWallet"){
     if($userInfo['wallet'] > 0 ){
@@ -739,10 +737,10 @@ if(preg_match('/^tranfserUserAmount(\d+)/',$userInfo['step'],$match) && $text !=
         }else sendMessage("لطفا عددی بزرگتر از صفر وارد کنید");
     }else sendMessage($mainValues['send_only_number']);
 }
-if($data=="increaseMyWallet" || $text == $buttonValues['sharj']){
-    if(isset($data)) delMessage();
+if($data=="increaseMyWallet"){
+    delMessage();
     sendMessage("🙂 عزیزم مقدار شارژ مورد نظر خود را به تومان وارد کن (بیشتر از 5000 تومان)",$cancelKey);
-    setUser("increaseMyWallet");
+    setUser($data);
 }
 if($userInfo['step'] == "increaseMyWallet" && $text != $buttonValues['cancel']){
     if(!is_numeric($text)){
@@ -10223,6 +10221,7 @@ if($data == "managePanel" and (($from_id == $admin || $userInfo['isAdmin'] == tr
 👤 عزیزم به بخش مدیریت خوشومدی 
 🤌 هرچی نیاز داشتی میتونی اینجا طبق نیازهات اضافه و تغییر بدی ، عزیزم $first_name جان اگه از فروش ربات درآمد داری از من حمایت کن تا پروژه همیشه آپدیت بمونه !
 
+🆔 @wizwizch
 
 🚪 /start
 ";
