@@ -674,7 +674,7 @@ if($data=="myInfo" || $text == $buttonValues['my_info']){
         [['text' => $buttonValues['sharj'], 'callback_data' => "increaseMyWallet"]],
         [['text' => "انتقال موجودی", 'callback_data' => "transferMyWallet"]],
         [['text' => $buttonValues['back_button'], 'callback_data' => "mainMenu"]],
-	['resize_keyboard' => true]
+	[['resize_keyboard' => true]]
     ]]);
     $responseText = "
 💞 اطلاعات حساب شما:
