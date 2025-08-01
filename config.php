@@ -6225,7 +6225,8 @@ function getMainReplyKeys(){
 
     if($botState['agencyState'] == "on" && $userInfo['is_agent'] == 1){
         $mainKeys[] = [['text'=>$buttonValues['agency_setting']]];
-        $mainKeys[] = [['text'=>$buttonValues['agent_one_buy'], ['text'=>$buttonValues['agent_much_buy']]];
+        // FIX: The line below has been corrected
+        $mainKeys[] = [['text'=>$buttonValues['agent_one_buy']], ['text'=>$buttonValues['agent_much_buy']]];
         $mainKeys[] = [['text'=>$buttonValues['my_subscriptions']]];
     }else{
         if ($botState['sellState'] == "on" || $from_id == $admin || $userInfo['isAdmin'] == true) {
@@ -6282,5 +6283,4 @@ function getMainReplyKeys(){
 
     return json_encode(['keyboard'=>$mainKeys, 'resize_keyboard'=>true]);
 }
-
 ?>
