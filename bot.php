@@ -49,9 +49,25 @@ $buttonMap = [
     'درخواست های رد شده' => 'rejectedAgentList'
 ];
 
-if (isset($text) && isset($buttonMap[$text])) {
-    $data = $buttonMap[$text]; // Convert text from keyboard to a virtual callback data
+// Fetch custom buttons from DB and add to map
+$stmt = $connection->prepare("SELECT * FROM `setting` WHERE `type` LIKE '%MAIN_BUTTONS%'");
+$stmt->execute();
+$customButtons = $stmt->get_result();
+$stmt->close();
+if($customButtons->num_rows > 0){
+    while($row = $customButtons->fetch_assoc()){
+        $title = str_replace("MAIN_BUTTONS", "", $row['type']);
+        $buttonMap[$title] = "showMainButtonAns" . $row['id'];
+    }
 }
+
+// Convert text to data if it's a button press
+$isButtonMapped = false;
+if (isset($text) && isset($buttonMap[$text])) {
+    $data = $buttonMap[$text];
+    $isButtonMapped = true;
+}
+
 
 GOTOSTART:
 if ($userInfo['step'] == "banned" && $from_id != $admin && $userInfo['isAdmin'] != true) {
@@ -10304,5 +10320,8 @@ if ($text == $buttonValues['cancel']) {
 
     sendMessage($mainValues['waiting_message'], $removeKeyboard);
     sendMessage($mainValues['reached_main_menu'],getMainKeys());
+}
+if(isset($text) && $userInfo['step'] == 'none' && !preg_match('/^\/([Ss]tart)/', $text) && $text != $buttonValues['cancel'] && !$isButtonMapped){
+    sendMessage($mainValues['please_select_from_below_buttons']);
 }
 ?>
