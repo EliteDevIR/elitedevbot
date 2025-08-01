@@ -35,6 +35,61 @@ if($robotState == "off" && $from_id != $admin){
     sendMessage($mainValues['bot_is_updating']);
     exit();
 }
+
+// START of new code block
+if(isset($text)){
+    $buttonKey = array_search($text, $buttonValues);
+
+    // Translate button text to the expected $data variable
+    if($buttonKey !== false){
+        switch($buttonKey){
+            case 'agency_setting': $data = "agencySettings"; break;
+            case 'agent_one_buy': $data = "agentOneBuy"; break;
+            case 'agent_much_buy': $data = "agentMuchBuy"; break;
+            case 'my_subscriptions':
+                if(isset($userInfo['is_agent']) && $userInfo['is_agent'] == 1) {
+                    $data = "agentConfigsList";
+                } else {
+                    $data = "mySubscriptions";
+                }
+                break;
+            case 'request_agency': $data = "requestAgency"; break;
+            case 'buy_subscriptions': $data = "buySubscription"; break;
+            case 'test_account': $data = "getTestAccount"; break;
+            case 'sharj': $data = "increaseMyWallet"; break;
+            case 'invite_friends': $data = "inviteFriends"; break;
+            case 'my_info': $data = "myInfo"; break;
+            case 'shared_existence': $data = "availableServers"; break;
+            case 'individual_existence': $data = "availableServers2"; break;
+            case 'application_links': $data = "reciveApplications"; break;
+            case 'my_tickets': $data = "supportSection"; break;
+            case 'search_config': $data = "showUUIDLeft"; break;
+        }
+    }
+    
+    // Handle custom buttons from the database if no standard button was matched
+    if(empty($data)){
+        $stmt = $connection->prepare("SELECT * FROM `setting` WHERE `type` = ?");
+        $buttonType = "MAIN_BUTTONS" . $text;
+        $stmt->bind_param("s", $buttonType);
+        $stmt->execute();
+        $customButton = $stmt->get_result();
+        $stmt->close();
+        if($customButton->num_rows > 0){
+            $answer = $customButton->fetch_assoc()['value'];
+            // Since this is a reply keyboard, we can't go "back" easily, so we just show the main menu again.
+            sendMessage($answer, getMainKeys()); 
+            exit(); 
+        }
+    }
+    
+    // Handle Admin Panel button
+    if($text == "مدیریت ربات ⚙️" && ($from_id == $admin || $userInfo['isAdmin'] == true)){
+        $data = "managePanel";
+    }
+}
+// END of new code block
+
 if(strstr($text, "/start ")){
     $inviter = str_replace("/start ", "", $text);
     if($inviter < 0) exit();
@@ -1314,7 +1369,7 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
             $vray_link = json_encode($response->vray_links);
         }
         else{
-            $token = RandomString(30);
+            
             $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
             $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
             $vray_link = json_encode($vraylink);
@@ -1769,8 +1824,12 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
             $vraylink = [$subLink];
             $vray_link = json_encode($response->vray_links);
         }else{
-            $token = RandomString(30);
-            $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
+            // استخراج توکن از لینک سابسکریپشن که پنل برمی‌گرداند
+            // این کار برای سازگاری با ستون `token` در دیتابیس انجام می‌شود
+            $token = isset($response->sub_link) ? str_replace("/sub/", "", $response->sub_link) : RandomString(30);
+            // ساخت لینک کامل سابسکریپشن با استفاده از آدرس اصلی پنل (panelUrl)
+            // تابع rtrim برای حذف اسلش اضافی از انتهای آدرس پنل استفاده می‌شود
+            $subLink = ($botState['subLinkState'] == "on" && isset($response->sub_link)) ? rtrim($panelUrl.":2090", '/') . $response->sub_link : "";
     
             $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
             $vray_link = json_encode($vraylink);
@@ -3021,8 +3080,13 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
         $vray_link = json_encode($response->vray_links);
     }
     else{
-        $token = RandomString(30);
-        $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
+        // استخراج توکن از لینک سابسکریپشن که پنل برمی‌گرداند
+        // این کار برای سازگاری با ستون `token` در دیتابیس انجام می‌شود
+        $token = isset($response->sub_link) ? str_replace("/sub/", "", $response->sub_link) : RandomString(30);
+
+        // ساخت لینک کامل سابسکریپشن با استفاده از آدرس اصلی پنل (panelUrl)
+        // تابع rtrim برای حذف اسلش اضافی از انتهای آدرس پنل استفاده می‌شود
+        $subLink = ($botState['subLinkState'] == "on" && isset($response->sub_link)) ? rtrim($panelUrl.":2090", '/') . $response->sub_link : "";
     
         $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
         $vray_link = json_encode($vraylink);
