@@ -32,7 +32,7 @@ function sendMessage($txt, $key = null, $parse ="MarkDown", $ci= null, $msg = nu
         'reply_to_message_id'=>$msg,
         'reply_markup'=>$key,
         'parse_mode'=>$parse,
-        'disable_web_page_preview' => true
+        'disable_web_page_preview' => $disable_preview
     ]);
 }
 function editKeys($keys = null, $msgId = null, $ci = null){
@@ -241,67 +241,65 @@ $removeKeyboard = json_encode(['remove_keyboard'=>true]);
 function getMainKeys(){
     global $connection, $userInfo, $from_id, $admin, $botState, $buttonValues;
     $mainKeys = array();
+    $temp = array();
 
     if($botState['agencyState'] == "on" && $userInfo['is_agent'] == 1){
-        $mainKeys[] = [['text'=>$buttonValues['agency_setting']]];
-        $mainKeys[] = [['text'=>$buttonValues['agent_one_buy']],['text'=>$buttonValues['agent_much_buy']]];
-        $mainKeys[] = [['text'=>$buttonValues['my_subscriptions']]];
-    } else {
-        $row = [];
-        if($botState['sellState'] == "on" || $from_id == $admin || $userInfo['isAdmin'] == true) {
-            $row[] = ['text' => $buttonValues['buy_subscriptions']];
-        }
-        $row[] = ['text' => $buttonValues['my_subscriptions']];
-        $mainKeys[] = $row;
-        
-        if($botState['agencyState'] == "on" && $userInfo['is_agent'] == 0){
-            $mainKeys[] = [['text'=>$buttonValues['request_agency']]];
-        }
+        $mainKeys = array_merge($mainKeys, [
+            [['text'=>$buttonValues['agency_setting'],'callback_data'=>"agencySettings"]],
+            [['text'=>$buttonValues['agent_one_buy'],'callback_data'=>"agentOneBuy"],['text'=>$buttonValues['agent_much_buy'],'callback_data'=>"agentMuchBuy"]],
+            [['text'=>$buttonValues['my_subscriptions'],'callback_data'=>"agentConfigsList"]],
+            ]);
+    }else{
+        $mainKeys = array_merge($mainKeys,[
+            (($botState['agencyState'] == "on" && $userInfo['is_agent'] == 0)?[
+                ['text'=>$buttonValues['request_agency'],'callback_data'=>"requestAgency"]
+                ]:
+                []),
+            (($botState['sellState'] == "on" || $from_id == $admin || $userInfo['isAdmin'] == true)?
+                [['text'=>$buttonValues['my_subscriptions'],'callback_data'=>'mySubscriptions'],['text'=>$buttonValues['buy_subscriptions'],'callback_data'=>"buySubscription"]]
+                :
+                [['text'=>$buttonValues['my_subscriptions'],'callback_data'=>'mySubscriptions']]
+                    )
+            ]);
     }
-
-    if($botState['testAccount'] == "on") {
-        $mainKeys[] = [['text'=>$buttonValues['test_account']]];
-    }
-
-    $mainKeys[] = [['text'=>$buttonValues['sharj']]];
-    $mainKeys[] = [['text'=>$buttonValues['my_info']], ['text'=>$buttonValues['invite_friends']]];
-
-    $existenceRow = [];
-    if($botState['sharedExistence'] == "on") $existenceRow[] = ['text' => $buttonValues['shared_existence']];
-    if($botState['individualExistence'] == "on") $existenceRow[] = ['text' => $buttonValues['individual_existence']];
-    if(!empty($existenceRow)) $mainKeys[] = $existenceRow;
-
-    $mainKeys[] = [['text'=>$buttonValues['my_tickets']], ['text'=>$buttonValues['application_links']]];
-
-    if($botState['searchState']=="on" || $from_id == $admin || $userInfo['isAdmin'] == true) {
-        $mainKeys[] = [['text' => $buttonValues['search_config']]];
-    }
-
+    $mainKeys = array_merge($mainKeys,[
+        (
+            ($botState['testAccount'] == "on")?[['text'=>$buttonValues['test_account'],'callback_data'=>"getTestAccount"]]:
+                []
+            ),
+        [['text'=>$buttonValues['sharj'],'callback_data'=>"increaseMyWallet"]],
+        [['text'=>$buttonValues['invite_friends'],'callback_data'=>"inviteFriends"],['text'=>$buttonValues['my_info'],'callback_data'=>"myInfo"]],
+        (($botState['sharedExistence'] == "on" && $botState['individualExistence'] == "on")?
+        [['text'=>$buttonValues['shared_existence'],'callback_data'=>"availableServers"],['text'=>$buttonValues['individual_existence'],'callback_data'=>"availableServers2"]]:[]),
+        (($botState['sharedExistence'] == "on" && $botState['individualExistence'] != "on")?
+            [['text'=>$buttonValues['shared_existence'],'callback_data'=>"availableServers"]]:[]),
+        (($botState['sharedExistence'] != "on" && $botState['individualExistence'] == "on")?
+            [['text'=>$buttonValues['individual_existence'],'callback_data'=>"availableServers2"]]:[]
+        ),
+        [['text'=>$buttonValues['application_links'],'callback_data'=>"reciveApplications"],['text'=>$buttonValues['my_tickets'],'callback_data'=>"supportSection"]],
+        (($botState['searchState']=="on" || $from_id == $admin || $userInfo['isAdmin'] == true)?
+            [['text'=>$buttonValues['search_config'],'callback_data'=>"showUUIDLeft"]]
+            :[]),
+    ]);
     $stmt = $connection->prepare("SELECT * FROM `setting` WHERE `type` LIKE '%MAIN_BUTTONS%'");
     $stmt->execute();
     $buttons = $stmt->get_result();
     $stmt->close();
-    
-    if($buttons->num_rows > 0){
-        $temp = [];
+    if($buttons->num_rows >0){
         while($row = $buttons->fetch_assoc()){
-            $title = str_replace("MAIN_BUTTONS", "", $row['type']);
-            $temp[] = ['text' => $title];
-            if(count($temp) >= 2){
-                $mainKeys[] = $temp;
-                $temp = [];
+            $rowId = $row['id'];
+            $title = str_replace("MAIN_BUTTONS","",$row['type']);
+            
+            $temp[] =['text'=>$title,'callback_data'=>"showMainButtonAns" . $rowId];
+            if(count($temp)>=2){
+                array_push($mainKeys,$temp);
+                $temp = array();
             }
         }
-        if(!empty($temp)){
-             $mainKeys[] = $temp;
-        }
     }
-    
-    if($from_id == $admin || $userInfo['isAdmin'] == true) {
-        $mainKeys[] = [['text'=>"مدیریت ربات ⚙️"]];
-    }
-    
-    return json_encode(['keyboard'=>$mainKeys, 'resize_keyboard' => true]); 
+    array_push($mainKeys,$temp);
+    if($from_id == $admin || $userInfo['isAdmin'] == true) array_push($mainKeys,[['text'=>"مدیریت ربات ⚙️",'callback_data'=>"managePanel"]]);
+    return json_encode(['inline_keyboard'=>$mainKeys]); 
 }
 function getAgentKeys(){
     global $buttonValues, $mainValues, $from_id, $userInfo, $connection;
@@ -313,40 +311,39 @@ function getAgentKeys(){
     $boughtAccounts = $stmt->get_result()->num_rows;
     $stmt->close();
     
-    $keyboard = [
-        [['text' => $buttonValues['agent_bought_accounts'] . ": " . $boughtAccounts]],
-        [['text' => $buttonValues['agent_joined_date'] . ": " . $joinedDate]],
-        [['text' => $buttonValues['agent_agency_date'] . ": " . $agencyDate]],
-        [['text' => $buttonValues['back_to_main']]]
-    ];
-
-    return json_encode(['keyboard'=>$keyboard, 'resize_keyboard' => true]);
+    return json_encode(['inline_keyboard'=>[
+        [['text'=>$boughtAccounts,'callback_data'=>"wizwizch"],['text'=>$buttonValues['agent_bought_accounts'],'callback_data'=>"wizwizch"]],
+        [['text'=>$joinedDate,'callback_data'=>"wizwizch"],['text'=>$buttonValues['agent_joined_date'],'callback_data'=>"wizwizch"]],
+        [['text'=>$agencyDate,'callback_data'=>"wizwizch"],['text'=>$buttonValues['agent_agency_date'],'callback_data'=>"wizwizch"]],
+        [['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]],
+    ]]);
 }
 function getAdminKeys(){
     global $buttonValues, $mainValues, $from_id, $admin;
     
-    $keyboard = [
-        [['text'=>$buttonValues['bot_reports']], ['text'=>$buttonValues['message_to_user']]],
-        [['text'=>$buttonValues['user_reports']]],
-        [['text'=>$buttonValues['increase_wallet']], ['text'=>$buttonValues['decrease_wallet']]],
-        [['text'=>$buttonValues['create_account']], ['text'=>$buttonValues['gift_volume_day']]],
-        [['text'=>$buttonValues['ban_user']], ['text'=>$buttonValues['unban_user']]],
-        [['text'=>$buttonValues['search_admin_config']]],
-        [['text'=>$buttonValues['server_settings']]],
-        [['text'=>$buttonValues['categories_settings']]],
-        [['text'=>$buttonValues['plan_settings']]],
-        [['text'=>$buttonValues['discount_settings']], ['text'=>$buttonValues['main_button_settings']]],
-        [['text'=>$buttonValues['gateways_settings']], ['text'=>$buttonValues['bot_settings']]],
-        [['text'=>$buttonValues['tickets_list']], ['text'=>$buttonValues['message_to_all']]],
-        [['text'=>$buttonValues['forward_to_all']]],
-        [['text'=>$buttonValues['agent_list']], ['text'=>'درخواست های رد شده']],
-        [['text'=>$buttonValues['back_to_main']]]
-    ];
-    if($from_id == $admin) {
-        array_splice($keyboard, 3, 0, [[['text'=>$buttonValues['admins_list']]]]);
-    }
+    return json_encode(['inline_keyboard'=>[
+        [['text'=>$buttonValues['bot_reports'],'callback_data'=>"botReports"],['text'=>$buttonValues['message_to_user'],'callback_data'=>"messageToSpeceficUser"]],
+        [['text'=>$buttonValues['user_reports'],'callback_data'=>"userReports"]],
+        ($from_id == $admin?[['text'=>$buttonValues['admins_list'],'callback_data'=>"adminsList"]]:[]),
+        [['text'=>$buttonValues['increase_wallet'],'callback_data'=>"increaseUserWallet"],['text'=>$buttonValues['decrease_wallet'],'callback_data'=>"decreaseUserWallet"]],
+        [['text'=>$buttonValues['create_account'],'callback_data'=>"createMultipleAccounts"],
+        ['text'=>$buttonValues['gift_volume_day'],'callback_data'=>"giftVolumeAndDay"]],
+        [['text'=>$buttonValues['ban_user'],'callback_data'=>"banUser"],['text'=>$buttonValues['unban_user'],'callback_data'=>"unbanUser"]],
+        [['text'=>$buttonValues['search_admin_config'],'callback_data'=>"searchUsersConfig"]],
+        [['text'=>$buttonValues['server_settings'],'callback_data'=>"serversSetting"]],
+        [['text'=>$buttonValues['categories_settings'],'callback_data'=>"categoriesSetting"]],
+        [['text'=>$buttonValues['plan_settings'],'callback_data'=>"backplan"]],
+        [['text'=>$buttonValues['discount_settings'],'callback_data'=>"discount_codes"],['text'=>$buttonValues['main_button_settings'],'callback_data'=>"mainMenuButtons"]],
+        [['text'=>$buttonValues['gateways_settings'],'callback_data'=>"gateWays_Channels"],['text'=>$buttonValues['bot_settings'],'callback_data'=>'botSettings']],
+        [['text'=>$buttonValues['tickets_list'],'callback_data'=>"ticketsList"],['text'=>$buttonValues['message_to_all'],'callback_data'=>"message2All"]],
+        [['text'=>$buttonValues['forward_to_all'],'callback_data'=>"forwardToAll"]],
+        [
+            ['text'=>$buttonValues['agent_list'],'callback_data'=>"agentsList"],
+            ['text'=>'درخواست های رد شده','callback_data'=>"rejectedAgentList"]
+            ],
+        [['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]],
+    ]]);
     
-    return json_encode(['keyboard' => $keyboard, 'resize_keyboard' => true]);
 }
 
 function setSettings($field, $value){
