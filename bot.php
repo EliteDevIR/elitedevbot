@@ -694,11 +694,11 @@ if($data == 'myInfo' || (isset($text) && $text == $buttonValues['my_info'])) {
     
     if (isset($data)) {
         // اگر از دکمه شیشه‌ای (قدیمی) بود، این پیام را ویرایش کن
-        sendMessage($responseText, $keys, "html");
+	editText($message_id, $responseText, $keys, "html");
         
     } else {
         // اگر از کیبورد اصلی (جدید) بود، یک پیام جدید بفرست
-        editText($message_id, $responseText, $keys, "html");
+        sendMessage($responseText, $keys, "html");
     }
 }
 if($data=="transferMyWallet"){
