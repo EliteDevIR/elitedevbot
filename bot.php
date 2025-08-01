@@ -670,7 +670,7 @@ if($data=="myInfo" || $text == $buttonValues['my_info']){
     
     $myWallet = number_format($userInfo['wallet']) . " تومان";
     
-    $keys = json_encode(['inline_keyboard' => [
+    $keys = json_encode(['keyboard' => [
         [['text' => $buttonValues['sharj'], 'callback_data' => "increaseMyWallet"]],
         [['text' => "انتقال موجودی", 'callback_data' => "transferMyWallet"]],
         [['text' => $buttonValues['back_button'], 'callback_data' => "mainMenu"]],
