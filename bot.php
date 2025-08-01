@@ -119,9 +119,9 @@ if(preg_match('/^\/([Ss]tart)/', $text) or $text == $buttonValues['back_to_main'
     setUser();
     setUser("", "temp"); 
     if(isset($data) and $data == "mainMenu"){
-        $res = editText($message_id, $mainValues['start_message'], getMainKeys());
+        $res = editText($message_id, $mainValues['start_message'], getMainReplyKeys());
         if(!$res->ok){
-            sendMessage($mainValues['start_message'], getMainKeys());
+            sendMessage($mainValues['start_message'], getMainReplyKeys());
         }
     }else{
         if($from_id != $admin && empty($userInfo['first_start'])){
@@ -133,9 +133,80 @@ if(preg_match('/^\/([Ss]tart)/', $text) or $text == $buttonValues['back_to_main'
             sendMessage(str_replace(["FULLNAME", "USERNAME", "USERID"], ["<a href='tg://user?id=$from_id'>$first_name</a>", $username, $from_id], $mainValues['new_member_joined'])
                 ,$keys, "html",$admin);
         }
-        sendMessage($mainValues['start_message'],getMainKeys());
+        sendMessage($mainValues['start_message'],getMainReplyKeys());
     }
 }
+// =================== HANDELING REPLY KEYBOARD BUTTONS ===================
+if (isset($text)) {
+    if($text == $buttonValues['buy_subscriptions']){
+        $data = 'buySubscription';
+    }
+    elseif($text == $buttonValues['my_subscriptions'] && !($userInfo['is_agent'] == 1)){
+        $data = 'mySubscriptions';
+    }
+    elseif($text == $buttonValues['my_subscriptions'] && $userInfo['is_agent'] == 1){
+        $data = 'agentConfigsList';
+    }
+    elseif($text == $buttonValues['my_info']){
+        $data = 'myInfo';
+    }
+    elseif($text == $buttonValues['sharj']){
+        $data = 'increaseMyWallet';
+    }
+    elseif($text == $buttonValues['invite_friends']){
+        $data = 'inviteFriends';
+    }
+    elseif($text == $buttonValues['test_account']){
+        $data = 'getTestAccount';
+    }
+    elseif($text == $buttonValues['my_tickets']){
+        $data = 'supportSection';
+    }
+    elseif($text == $buttonValues['application_links']){
+        $data = 'reciveApplications';
+    }
+    elseif($text == $buttonValues['search_config']){
+        $data = 'showUUIDLeft';
+    }
+    elseif($text == $buttonValues['agency_setting']){
+        $data = 'agencySettings';
+    }
+    elseif($text == $buttonValues['request_agency']){
+        $data = 'requestAgency';
+    }
+    elseif($text == $buttonValues['agent_one_buy']){
+        $data = 'agentOneBuy';
+    }
+    elseif($text == $buttonValues['agent_much_buy']){
+        $data = 'agentMuchBuy';
+    }
+    elseif($text == "مدیریت ربات ⚙️" && ($from_id == $admin || $userInfo['isAdmin'] == true)){
+        $data = 'managePanel';
+    }
+    elseif($text == $buttonValues['shared_existence']){
+        $data = 'availableServers';
+    }
+    elseif($text == $buttonValues['individual_existence']){
+        $data = 'availableServers2';
+    }
+    else{
+        $stmt = $connection->prepare("SELECT * FROM `setting` WHERE `type` LIKE '%MAIN_BUTTONS%'");
+        $stmt->execute();
+        $buttons = $stmt->get_result();
+        $stmt->close();
+        if($buttons->num_rows > 0){
+            while($row = $buttons->fetch_assoc()){
+                $rowId = $row['id'];
+                $title = str_replace("MAIN_BUTTONS","",$row['type']);
+                if($text == $title){
+                    $data = "showMainButtonAns" . $rowId;
+                    break;
+                }
+            }
+        }
+    }
+}
+// =======================================================================
 if(preg_match('/^sendMessageToUser(\d+)/',$data,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true) && $text != $buttonValues['cancel']){
     editText($message_id,'🔘|لطفا پیامت رو بفرست');
     setUser($data);
@@ -10221,6 +10292,7 @@ if($data == "managePanel" and (($from_id == $admin || $userInfo['isAdmin'] == tr
 👤 عزیزم به بخش مدیریت خوشومدی 
 🤌 هرچی نیاز داشتی میتونی اینجا طبق نیازهات اضافه و تغییر بدی ، عزیزم $first_name جان اگه از فروش ربات درآمد داری از من حمایت کن تا پروژه همیشه آپدیت بمونه !
 
+🆔 @wizwizch
 
 🚪 /start
 ";
