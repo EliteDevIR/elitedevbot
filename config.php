@@ -32,7 +32,7 @@ function sendMessage($txt, $key = null, $parse ="MarkDown", $ci= null, $msg = nu
         'reply_to_message_id'=>$msg,
         'reply_markup'=>$key,
         'parse_mode'=>$parse,
-        'disable_web_page_preview' => $disable_preview
+        'disable_web_page_preview' => true
     ]);
 }
 function editKeys($keys = null, $msgId = null, $ci = null){
@@ -303,11 +303,8 @@ function getMainKeys(){
     
     return json_encode(['keyboard'=>$mainKeys, 'resize_keyboard' => true]); 
 }
-
 function getAgentKeys(){
     global $buttonValues, $mainValues, $from_id, $userInfo, $connection;
-    // Agent panel is better with inline keyboard for showing stats, but changing as requested.
-    // Note: Informational rows won't be interactive.
     $agencyDate = jdate("Y-m-d H:i:s",$userInfo['agent_date']);
     $joinedDate = jdate("Y-m-d H:i:s",$userInfo['date']);
     $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `userid` = ? AND `agent_bought` = 1");
@@ -325,7 +322,6 @@ function getAgentKeys(){
 
     return json_encode(['keyboard'=>$keyboard, 'resize_keyboard' => true]);
 }
-
 function getAdminKeys(){
     global $buttonValues, $mainValues, $from_id, $admin;
     
